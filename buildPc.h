@@ -57,4 +57,3 @@ string getValidStringInput(const string& prompt);
 void flushNewline();
 
 #endif
-
