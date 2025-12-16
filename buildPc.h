@@ -5,7 +5,6 @@
 using namespace std;
 
 // ==================== STRUKTUR DATA ====================
-
 struct Node {
     string name;
     int price;
@@ -58,3 +57,4 @@ string getValidStringInput(const string& prompt);
 void flushNewline();
 
 #endif
+
