@@ -11,7 +11,6 @@ struct UserAccount {
     string password;
     int role; // 1=admin, 2=user
 };
-
 vector<UserAccount> accounts;
 
 string getPassword() {
@@ -94,7 +93,8 @@ void showAdminMenu() {
     cout << "8.  Buat Paket Build\n";
     cout << "9.  Lihat Paket Build\n";
     cout << "10. Hapus Paket Build\n";
-    cout << "11. Logout\n";
+    cout << "11. Simpan ke CSV\n";
+    cout << "12. Logout\n";
     cout << "========================================\n";
 }
 
@@ -117,11 +117,11 @@ void handleSearch(Node* root) {
     searchNodeFuzzy(root, keyword, results);
     
     if(results.empty()) {
-        cout << "!!! Tidak ditemukan komponen dengan kata kunci !!! '" << keyword << "'.\n";
+        cout << "❌ Tidak ditemukan komponen dengan kata kunci '" << keyword << "'.\n";
         return;
     }
     
-    cout << "\n Ditemukan " << results.size() << " hasil:\n";
+    cout << "\n✅ Ditemukan " << results.size() << " hasil:\n";
     cout << "========================================\n";
     
     for(size_t i = 0; i < results.size(); i++) {
@@ -149,7 +149,7 @@ void handleAddComponent(Node* root) {
     
     vector<string> path;
     if(!searchNode(root, parent, path)) {
-        cout << "!!! Parent '" << parent << "' tidak ditemukan.\n";
+        cout << "❌ Parent '" << parent << "' tidak ditemukan.\n";
         return;
     }
     
@@ -157,9 +157,9 @@ void handleAddComponent(Node* root) {
     int price = getValidInput<int>("Harga (Rp): ", 0, 999999999);
     
     if(insertNode(root, parent, name, price)) {
-        cout << "Komponen '" << name << "' berhasil ditambahkan.\n";
+        cout << "✅ Komponen '" << name << "' berhasil ditambahkan.\n";
     } else {
-        cout << "!!! Gagal menambahkan komponen.\n";
+        cout << "❌ Gagal menambahkan komponen.\n";
     }
 }
 
@@ -169,14 +169,14 @@ void handleDeleteComponent(Node* root) {
     string name = getValidStringInput("Nama yang ingin dihapus: ");
     
     if(name == "PC") {
-        cout << "!!! Tidak bisa menghapus root (PC)!\n";
+        cout << "❌ Tidak bisa menghapus root (PC)!\n";
         return;
     }
     
     if(deleteNode(root, name)) {
-        cout << " '" << name << "' berhasil dihapus.\n";
+        cout << "✅ '" << name << "' berhasil dihapus.\n";
     } else {
-        cout << "!!! '" << name << "' tidak ditemukan.\n";
+        cout << "❌ '" << name << "' tidak ditemukan.\n";
     }
 }
 
@@ -203,7 +203,7 @@ void adminMenuLoop(Node* root) {
     int choice = 0;
     do {
         showAdminMenu();
-        choice = getValidInput<int>("Pilih: ", 1, 11);
+        choice = getValidInput<int>("Pilih: ", 1, 12);
         flushNewline();
         
         switch(choice) {
@@ -249,22 +249,25 @@ void adminMenuLoop(Node* root) {
             case 10:
                 cout << "\n=== HAPUS PAKET BUILD ===\n";
                 if(savedBuilds.empty()) {
-                    cout << "!!! Belum ada paket build.\n";
+                    cout << "❌ Belum ada paket build.\n";
                 } else {
                     adminListBuildPackages();
                     string pkg = getValidStringInput("\nNama paket yang ingin dihapus: ");
                     if(adminDeleteBuildPackage(pkg)) {
-                        cout << " Paket '" << pkg << "' berhasil dihapus.\n";
+                        cout << "✅ Paket '" << pkg << "' berhasil dihapus.\n";
                     } else {
-                        cout << "!!! Paket '" << pkg << "' tidak ditemukan.\n";
+                        cout << "❌ Paket '" << pkg << "' tidak ditemukan.\n";
                     }
                 }
                 break;
             case 11:
+                saveToCSV(root, "components.csv");
+                break;
+            case 12:
                 cout << "\n👋 Logout berhasil.\n";
                 break;
         }
-    } while(choice != 11);
+    } while(choice != 12);
 }
 
 void userMenuLoop(Node* root) {
@@ -284,7 +287,7 @@ void userMenuLoop(Node* root) {
                 break;
             case 3:
                 if(savedBuilds.empty()) {
-                    cout << "\n Belum ada paket build dari admin.\n";
+                    cout << "\n❌ Belum ada paket build dari admin.\n";
                 } else {
                     handleViewPackages();
                 }
@@ -301,7 +304,7 @@ void userMenuLoop(Node* root) {
 int main() {
     Node* root = loadFromCSV("components.csv");
     if(!root) {
-        cout << " Gagal memuat data. Pastikan file 'components.csv' ada.\n";
+        cout << "❌ Gagal memuat data. Pastikan file 'components.csv' ada.\n";
         return 1;
     }
     
@@ -323,10 +326,10 @@ int main() {
         else if(top == 2) {
             UserAccount* acc = loginAccount();
             if(!acc) {
-                cout << "!!! Login gagal. Username atau password salah.\n";
+                cout << "❌ Login gagal. Username atau password salah.\n";
                 continue;
             }
-            cout << "\n Login sukses! Selamat datang, " << acc->username << "!\n";
+            cout << "\n✅ Login sukses! Selamat datang, " << acc->username << "!\n";
             
             if(acc->role == 1) {
                 adminMenuLoop(root);
@@ -345,4 +348,5 @@ int main() {
     cout << "      APLIKASI BUILD PC\n";
     cout << "========================================\n";
     return 0;
+
 }
