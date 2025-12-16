@@ -4,45 +4,57 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+// ==================== STRUKTUR DATA ====================
+
 struct Node {
     string name;
     int price;
     vector<Node*> children;
-
     Node(const string& n, int p = 0) : name(n), price(p) {}
 };
 
+struct BuildPackage {
+    string packageName;
+    vector<pair<string, int>> items;
+    long long totalPrice;
+};
 
-// Tree utility
+extern vector<BuildPackage> savedBuilds;
+
+// ==================== CORE FUNCTIONS ====================
+
+// Tree Operations
 void deleteSubtree(Node* root);
 void displayTree(Node* root, int depth = 0);
-
-// Traversal
-void preorder(Node* root);
-void inorder(Node* root);
-void postorder(Node* root);
-
-// Searching
 Node* searchNode(Node* root, const string& target, vector<string>& path);
-bool findParent(Node* root, const string& target, Node*& parentOut, int& idxOut);
-
-// Insert / delete
+void searchNodeFuzzy(Node* root, const string& keyword, vector<pair<Node*, string>>& results, const string& parentPath = "");
 bool insertNode(Node* root, const string& parentName, const string& newName, int price);
 bool deleteNode(Node* root, const string& name);
-
-// Stats
 int countNodes(Node* root);
-int height(Node* root);
+int getTreeLevel(Node* root, const string& target, int level = 0);
 
-// Build initial tree
-Node* buildInitialTree();
+// CSV Operations
+Node* loadFromCSV(const string& filename);
+void saveToCSV(Node* root, const string& filename);
 
-// Build PC tools
+// Traversal
+void preorderPrint(Node* root, int depth = 0);
+long long postorder(Node* root, int depth = 0);
+void inorder(Node* root);
+
+// Build PC
 void collectPricedItems(Node* node, vector<Node*>& out);
 void buildPcInteractive(Node* root, vector<Node*>& currentBuild);
-void resetBuild(vector<Node*>& currentBuild);
 
-// Utility
+// Admin Package
+void adminCreateBuildPackage(Node* root);
+void adminListBuildPackages();
+bool adminDeleteBuildPackage(const string& packageName);
+
+// Input Validation
+template<typename T>
+T getValidInput(const string& prompt, T minVal, T maxVal);
+string getValidStringInput(const string& prompt);
 void flushNewline();
 
 #endif
