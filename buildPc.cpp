@@ -10,7 +10,7 @@ T getValidInput(const string& prompt, T minVal, T maxVal) {
     while(true) {
         cout << prompt;
         if(cin >> val && val >= minVal && val <= maxVal) return val;
-        cout << "❌ Input harus antara " << minVal << " dan " << maxVal << ".\n";
+        cout << "!!! Input harus antara " << minVal << " dan " << maxVal << ".\n";
         cin.clear(); 
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
@@ -26,7 +26,7 @@ string getValidStringInput(const string& prompt) {
         input.erase(0, input.find_first_not_of(" \t\n\r"));
         input.erase(input.find_last_not_of(" \t\n\r") + 1);
         if(!input.empty()) return input;
-        cout << "❌ Input tidak boleh kosong!\n";
+        cout << "!!! Input tidak boleh kosong !!!\n";
     }
 }
 
@@ -72,7 +72,7 @@ int getTreeLevel(Node* root, const string& target, int level) {
 Node* loadFromCSV(const string& filename) {
     ifstream file(filename);
     if(!file.is_open()) {
-        cout << "❌ Gagal membuka file: " << filename << "\n";
+        cout << "!!! Gagal membuka file: !!!" << filename << "\n";
         return nullptr;
     }
     
@@ -103,7 +103,7 @@ Node* loadFromCSV(const string& filename) {
     }
     
     file.close();
-    cout << "✅ Data berhasil dimuat dari " << filename << "\n";
+    cout << " Data berhasil dimuat dari " << filename << "\n";
     return root;
 }
 
@@ -115,13 +115,13 @@ void saveNodeToCSV(Node* node, ofstream& f, int lvl, const string& parent) {
 void saveToCSV(Node* root, const string& filename) {
     ofstream file(filename);
     if(!file.is_open()) {
-        cout << "❌ Gagal menyimpan ke file: " << filename << "\n";
+        cout << "!!! Gagal menyimpan ke file: !!!" << filename << "\n";
         return;
     }
     file << "level,parent,name,price\n";
     saveNodeToCSV(root, file, 0, "");
     file.close();
-    cout << "✅ Data berhasil disimpan ke " << filename << "\n";
+    cout << "!!! Data berhasil disimpan ke !!!" << filename << "\n";
 }
 
 // ==================== TRAVERSAL ====================
@@ -237,6 +237,16 @@ bool deleteNode(Node* root, const string& name) {
     return false;
 }
 
+bool editNode(Node* root, const string& oldName, const string& newName, int newPrice) {
+    vector<string> path;
+    Node* node = searchNode(root, oldName, path);
+    if(!node) return false;
+    
+    node->name = newName;
+    node->price = newPrice;
+    return true;
+}
+
 // ==================== BUILD PC ====================
 
 void collectPricedItems(Node* node, vector<Node*>& out) {
@@ -320,7 +330,7 @@ void adminCreateBuildPackage(Node* root) {
     }
     
     savedBuilds.push_back(pkg);
-    cout << "✅ Paket '" << pkg.packageName << "' berhasil disimpan. Total: Rp " << pkg.totalPrice << "\n";
+    cout << " Paket '" << pkg.packageName << "' berhasil disimpan. Total: Rp " << pkg.totalPrice << "\n";
 }
 
 void adminListBuildPackages() {
