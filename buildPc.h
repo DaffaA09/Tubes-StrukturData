@@ -5,6 +5,7 @@
 using namespace std;
 
 // ==================== STRUKTUR DATA ====================
+
 struct Node {
     string name;
     int price;
@@ -29,6 +30,7 @@ Node* searchNode(Node* root, const string& target, vector<string>& path);
 void searchNodeFuzzy(Node* root, const string& keyword, vector<pair<Node*, string>>& results, const string& parentPath = "");
 bool insertNode(Node* root, const string& parentName, const string& newName, int price);
 bool deleteNode(Node* root, const string& name);
+bool editNode(Node* root, const string& oldName, const string& newName, int newPrice);
 int countNodes(Node* root);
 int getTreeLevel(Node* root, const string& target, int level = 0);
 
