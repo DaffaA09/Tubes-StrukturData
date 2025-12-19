@@ -248,10 +248,37 @@ void handleDeleteComponent(Node* root) {
         return;
     }
     
-    if(deleteNode(root, name)) {
-        cout << "✅ '" << name << "' berhasil dihapus.\n";
-    } else {
+    // Cek apakah komponen ada
+    vector<string> path;
+    Node* node = searchNode(root, name, path);
+    
+    if(!node) {
         cout << "!!! '" << name << "' tidak ditemukan.\n";
+        return;
+    }
+    
+    // Tampilkan info komponen
+    cout << "\n--- Info Komponen ---\n";
+    cout << "Nama  : " << node->name << "\n";
+    if(node->price > 0) cout << "Harga : Rp " << node->price << "\n";
+    if(!node->children.empty()) {
+        cout << "⚠️  Komponen ini memiliki " << node->children.size() << " sub-komponen yang akan ikut terhapus!\n";
+    }
+    
+    // Konfirmasi
+    cout << "\nYakin ingin menghapus '" << name << "'? (y/n): ";
+    char confirm;
+    cin >> confirm;
+    flushNewline();
+    
+    if(confirm == 'y' || confirm == 'Y') {
+        if(deleteNode(root, name)) {
+            cout << "✅ '" << name << "' berhasil dihapus.\n";
+        } else {
+            cout << "!!! Gagal menghapus komponen.\n";
+        }
+    } else {
+        cout << "❌ Penghapusan dibatalkan.\n";
     }
 }
 
@@ -331,10 +358,37 @@ void adminMenuLoop(Node* root) {
                 } else {
                     adminListBuildPackages();
                     string pkg = getValidStringInput("\nNama paket yang ingin dihapus: ");
-                    if(adminDeleteBuildPackage(pkg)) {
-                        cout << "✅ Paket '" << pkg << "' berhasil dihapus.\n";
-                    } else {
+                    
+                    // Cari paket untuk konfirmasi
+                    bool found = false;
+                    for(auto &b : savedBuilds) {
+                        if(b.packageName == pkg) {
+                            found = true;
+                            cout << "\n--- Info Paket ---\n";
+                            cout << "Nama  : " << b.packageName << "\n";
+                            cout << "Total : Rp " << b.totalPrice << "\n";
+                            cout << "Items : " << b.items.size() << " komponen\n";
+                            break;
+                        }
+                    }
+                    
+                    if(!found) {
                         cout << "!!! Paket '" << pkg << "' tidak ditemukan.\n";
+                    } else {
+                        cout << "\nYakin ingin menghapus paket '" << pkg << "'? (y/n): ";
+                        char confirm;
+                        cin >> confirm;
+                        flushNewline();
+                        
+                        if(confirm == 'y' || confirm == 'Y') {
+                            if(adminDeleteBuildPackage(pkg)) {
+                                cout << "✅ Paket '" << pkg << "' berhasil dihapus.\n";
+                            } else {
+                                cout << "!!! Gagal menghapus paket.\n";
+                            }
+                        } else {
+                            cout << "❌ Penghapusan dibatalkan.\n";
+                        }
                     }
                 }
                 break;
@@ -424,4 +478,5 @@ int main() {
     cout << "========================================\n";
     return 0;
 }
+
 
