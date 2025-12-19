@@ -4,6 +4,9 @@
 
 using namespace std;
 
+// ==================== ADMIN KEY ====================
+const string ADMIN_KEY = "SUPERUSERDO"; // Key untuk register sebagai admin
+
 // ==================== USER ACCOUNT ====================
 
 struct UserAccount {
@@ -54,8 +57,23 @@ void registerAccount() {
     } while(pass.length() < 8);
     
     int role = getValidInput<int>("Role (1=admin, 2=user): ", 1, 2);
+    
+    // Jika pilih role admin, harus masukkan key
+    if(role == 1) {
+        cout << "Masukkan Admin Key: ";
+        string key;
+        cin >> key;
+        flushNewline();
+        
+        if(key != ADMIN_KEY) {
+            cout << "❌ Admin Key salah! Registrasi gagal.\n";
+            return;
+        }
+        cout << "✅ Admin Key valid!\n";
+    }
+    
     accounts.push_back({user, pass, role});
-    cout << "✅ Registrasi sukses.\n";
+    cout << "✅ Registrasi sukses sebagai " << (role == 1 ? "Admin" : "User") << ".\n";
 }
 
 UserAccount* loginAccount() {
@@ -66,11 +84,6 @@ UserAccount* loginAccount() {
     flushNewline();
     cout << "Password: ";
     string pass = getPassword();
-    
-    if(user == "Admin123" && pass == "Admin123") {
-        static UserAccount builtinAdmin = {"Admin123", "Admin123", 1};
-        return &builtinAdmin;
-    }
     
     for(auto &a : accounts) {
         if(a.username == user && a.password == pass) return &a;
@@ -86,15 +99,16 @@ void showAdminMenu() {
     cout << "========================================\n";
     cout << "1.  Tampilkan Semua Komponen\n";
     cout << "2.  Tambah Komponen\n";
-    cout << "3.  Hapus Komponen\n";
-    cout << "4.  Cari Komponen\n";
-    cout << "5.  Export Katalog (Preorder)\n";
-    cout << "6.  Tampilkan Inorder\n";
-    cout << "7.  Hitung Total per Kategori (Postorder)\n";
-    cout << "8.  Buat Paket Build\n";
-    cout << "9.  Lihat Paket Build\n";
-    cout << "10. Hapus Paket Build\n";
-    cout << "11. Logout\n";
+    cout << "3.  Edit Komponen\n";
+    cout << "4.  Hapus Komponen\n";
+    cout << "5.  Cari Komponen\n";
+    cout << "6.  Export Katalog (Preorder)\n";
+    cout << "7.  Tampilkan Inorder\n";
+    cout << "8.  Hitung Total per Kategori (Postorder)\n";
+    cout << "9.  Buat Paket Build\n";
+    cout << "10. Lihat Paket Build\n";
+    cout << "11. Hapus Paket Build\n";
+    cout << "12. Logout\n";
     cout << "========================================\n";
 }
 
@@ -157,9 +171,70 @@ void handleAddComponent(Node* root) {
     int price = getValidInput<int>("Harga (Rp): ", 0, 999999999);
     
     if(insertNode(root, parent, name, price)) {
-        cout << "Komponen '" << name << "' berhasil ditambahkan.\n";
+        cout << "✅ Komponen '" << name << "' berhasil ditambahkan.\n";
     } else {
         cout << "!!! Gagal menambahkan komponen.\n";
+    }
+}
+
+void handleEditComponent(Node* root) {
+    cout << "\n=== EDIT KOMPONEN ===\n";
+    string oldName = getValidStringInput("Nama komponen yang ingin diedit: ");
+    
+    // Cek apakah komponen ada
+    vector<string> path;
+    Node* node = searchNode(root, oldName, path);
+    
+    if(!node) {
+        cout << "!!! Komponen '" << oldName << "' tidak ditemukan.\n";
+        return;
+    }
+    
+    if(oldName == "PC") {
+        cout << "!!! Tidak bisa mengedit root (PC)!\n";
+        return;
+    }
+    
+    // Tampilkan info komponen saat ini
+    cout << "\n--- Info Komponen Saat Ini ---\n";
+    cout << "Nama  : " << node->name << "\n";
+    cout << "Harga : Rp " << node->price << "\n";
+    cout << "Path  : ";
+    for(size_t i = 0; i < path.size(); i++) {
+        cout << path[i];
+        if(i < path.size() - 1) cout << " → ";
+    }
+    cout << "\n\n";
+    
+    // Input data baru
+    string newName = getValidStringInput("Nama baru (tekan Enter untuk tidak mengubah): ");
+    if(newName.empty()) newName = oldName;
+    
+    cout << "Harga baru (Rp, masukkan -1 untuk tidak mengubah): ";
+    int newPrice;
+    cin >> newPrice;
+    flushNewline();
+    
+    if(newPrice == -1) newPrice = node->price;
+    if(newPrice < 0) newPrice = 0;
+    
+    // Konfirmasi
+    cout << "\n--- Konfirmasi Perubahan ---\n";
+    cout << "Nama  : " << oldName << " → " << newName << "\n";
+    cout << "Harga : Rp " << node->price << " → Rp " << newPrice << "\n";
+    cout << "Lanjutkan? (y/n): ";
+    char confirm;
+    cin >> confirm;
+    flushNewline();
+    
+    if(confirm == 'y' || confirm == 'Y') {
+        if(editNode(root, oldName, newName, newPrice)) {
+            cout << "✅ Komponen berhasil diedit.\n";
+        } else {
+            cout << "!!! Gagal mengedit komponen.\n";
+        }
+    } else {
+        cout << "❌ Edit dibatalkan.\n";
     }
 }
 
@@ -174,7 +249,7 @@ void handleDeleteComponent(Node* root) {
     }
     
     if(deleteNode(root, name)) {
-        cout << " '" << name << "' berhasil dihapus.\n";
+        cout << "✅ '" << name << "' berhasil dihapus.\n";
     } else {
         cout << "!!! '" << name << "' tidak ditemukan.\n";
     }
@@ -203,7 +278,7 @@ void adminMenuLoop(Node* root) {
     int choice = 0;
     do {
         showAdminMenu();
-        choice = getValidInput<int>("Pilih: ", 1, 11);
+        choice = getValidInput<int>("Pilih: ", 1, 12);
         flushNewline();
         
         switch(choice) {
@@ -215,22 +290,25 @@ void adminMenuLoop(Node* root) {
                 handleAddComponent(root);
                 break;
             case 3:
-                handleDeleteComponent(root);
+                handleEditComponent(root);
                 break;
             case 4:
-                handleSearch(root);
+                handleDeleteComponent(root);
                 break;
             case 5:
+                handleSearch(root);
+                break;
+            case 6:
                 cout << "\n=== EXPORT KATALOG (Preorder) ===\n";
                 preorderPrint(root);
                 cout << "Total node: " << countNodes(root) << " item\n";
                 break;
-            case 6:
+            case 7:
                 cout << "\n=== TAMPILKAN INORDER ===\n";
                 inorder(root);
                 cout << "\n";
                 break;
-            case 7:
+            case 8:
                 cout << "\n=== HITUNG TOTAL PER KATEGORI (Postorder) ===\n\n";
                 {
                     long long grandTotal = postorder(root);
@@ -239,14 +317,14 @@ void adminMenuLoop(Node* root) {
                     cout << "========================================\n";
                 }
                 break;
-            case 8:
+            case 9:
                 cout << "\n=== BUAT PAKET BUILD ===\n";
                 adminCreateBuildPackage(root);
                 break;
-            case 9:
+            case 10:
                 handleViewPackages();
                 break;
-            case 10:
+            case 11:
                 cout << "\n=== HAPUS PAKET BUILD ===\n";
                 if(savedBuilds.empty()) {
                     cout << "!!! Belum ada paket build.\n";
@@ -254,17 +332,17 @@ void adminMenuLoop(Node* root) {
                     adminListBuildPackages();
                     string pkg = getValidStringInput("\nNama paket yang ingin dihapus: ");
                     if(adminDeleteBuildPackage(pkg)) {
-                        cout << " Paket '" << pkg << "' berhasil dihapus.\n";
+                        cout << "✅ Paket '" << pkg << "' berhasil dihapus.\n";
                     } else {
                         cout << "!!! Paket '" << pkg << "' tidak ditemukan.\n";
                     }
                 }
                 break;
-            case 11:
+            case 12:
                 cout << "\n👋 Logout berhasil.\n";
                 break;
         }
-    } while(choice != 11);
+    } while(choice != 12);
 }
 
 void userMenuLoop(Node* root) {
@@ -284,7 +362,7 @@ void userMenuLoop(Node* root) {
                 break;
             case 3:
                 if(savedBuilds.empty()) {
-                    cout << "\n Belum ada paket build dari admin.\n";
+                    cout << "\n❌ Belum ada paket build dari admin.\n";
                 } else {
                     handleViewPackages();
                 }
@@ -301,7 +379,7 @@ void userMenuLoop(Node* root) {
 int main() {
     Node* root = loadFromCSV("components.csv");
     if(!root) {
-        cout << " Gagal memuat data. Pastikan file 'components.csv' ada.\n";
+        cout << "❌ Gagal memuat data. Pastikan file 'components.csv' ada.\n";
         return 1;
     }
     
@@ -323,10 +401,10 @@ int main() {
         else if(top == 2) {
             UserAccount* acc = loginAccount();
             if(!acc) {
-                cout << "!!! Login gagal. Username atau password salah.\n";
+                cout << "❌ Login gagal. Username atau password salah.\n";
                 continue;
             }
-            cout << "\n Login sukses! Selamat datang, " << acc->username << "!\n";
+            cout << "\n✅ Login sukses! Selamat datang, " << acc->username << "!\n";
             
             if(acc->role == 1) {
                 adminMenuLoop(root);
